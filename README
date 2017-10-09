@@ -9,5 +9,5 @@ rollbaks. Features:
 * 14 days and 10 steps (minimum) rollback of all deleted/changed files
 * unlimited/incremental rollback of selected deleted/changed files/paths
 * basic exclude and include control by config files on the server being backed up
-* backup report stored in the server being backed up
+* backup report stored on the server being backed up
 * rsync on non-standard ssh port, if need be

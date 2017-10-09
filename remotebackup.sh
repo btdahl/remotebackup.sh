@@ -2,8 +2,9 @@
 
 # -- remotebackup.sh - rsync rotating rollback and/or incremental backup
 #
-#    by btd@apario.net 
 #    2002 - 2017 (c) apario
+#    https://github.com/btdahl/remotebackup.sh
+#    by btd@apario.net
 #
 #    Bash script that uses rsync to create full remote server backup with
 #    rollbaks. Features:
@@ -11,7 +12,7 @@
 #    * 14 days and 10 steps (minimum) rollback of all deleted/changed files
 #    * unlimited/incremental rollback of selected deleted/changed files/paths
 #    * basic exclude and include control by config files on the server being backed up
-#    * backup report stored in the server being backed up
+#    * backup report stored on the server being backed up
 #    * rsync on non-standard ssh port, if need be
 
 # -- things you may want to change
@@ -78,6 +79,20 @@ if [ ! -f $LOCALEXCLUDELISTFILE ] ; then /bin/echo "local exclude list file ($LO
 /bin/echo ""
 
 
+# -- checking for lock file
+#    a lock file present would indicate a currently running backup
+
+if [ ! -f "$LOCKFILEPATH/$1.pid" ] ; then
+  /bin/echo -n "lock file does not exist, creating..."
+  /bin/mkdir -p $LOCKFILEPATH
+  /bin/touch "$LOCKFILEPATH/$1.pid"
+  /bin/echo "done"
+else
+  /bin/echo "lock file $LOCKFILEPATH/$1.pid present... aborting" >&2
+  exit 0
+fi
+
+
 # -- fetch remote excludelist from server
 
 /bin/echo "deleting servers exclude list and fetching new from server"
@@ -104,20 +119,6 @@ if [ -f $CONFIGTEMPPATH/$1.incrementallist ] ; then
   /bin/echo "fetched remote excludelist file"
 else
   /bin/echo "no remote incremental file $REMOTEINCREMENTALLISTFILE for $1"
-fi
-
-
-# -- checking for lock file
-#    a lock file present would indicate a currently running backup
-
-if [ ! -f "$LOCKFILEPATH/$1.pid" ] ; then
-  /bin/echo -n "lock file does not exist, creating..."
-  /bin/mkdir -p $LOCKFILEPATH
-  /bin/touch "$LOCKFILEPATH/$1.pid"
-  /bin/echo "done"
-else
-  /bin/echo "lock file $LOCKFILEPATH/$1.pid present... aborting" >&2
-  exit 0
 fi
 
 
