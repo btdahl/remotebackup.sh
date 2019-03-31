@@ -2,7 +2,7 @@
 
 # -- remotebackup.sh - rsync rotating rollback and/or incremental backup
 #
-#    2002 - 2017 (c) apario
+#    2002 - 2019 (c) apario
 #    https://github.com/btdahl/remotebackup.sh
 #    by btd@apario.net
 #
@@ -41,7 +41,7 @@ LOCALEXCLUDELISTFILE="/etc/backupexcludelist"
 REMOTEEXCLUDELISTFILE="/root/.backup/excludelist"
 REMOTEINCREMENTALLISTFILE="/root/.backup/incrementallist"
 REMOTEBACKUPREPORTFILE="/root/.backup/backupreport.txt"
-BWLIMIT=3000
+BWLIMIT=5120
 
 
 # -- things you should leave alone, but maybe you want to tweak
@@ -178,11 +178,11 @@ cd - > /dev/null
 /bin/echo ""
 
 if [ ! -f $CONFIGTEMPPATH/$1.incrementallist ] ; then 
-	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --delete --delete-excluded --backup --backup-dir $LIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
+	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aHP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --delete --delete-excluded --backup --backup-dir $LIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
 else
-	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --exclude-from=$CONFIGTEMPPATH/$1.incrementallist --delete --backup --backup-dir $LIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
-	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --delete --delete-excluded --backup --backup-dir $UNLIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
-	/usr/bin/rsync -aPvv --sparse --remove-source-files --exclude-from=$CONFIGTEMPPATH/$1.incrementallist $UNLIMITEDROLLBACKDIR/$NOW/* $LIMITEDROLLBACKDIR/$NOW/
+	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aHP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --exclude-from=$CONFIGTEMPPATH/$1.incrementallist --delete --backup --backup-dir $LIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
+	/usr/bin/rsync -e "ssh -p $SSHPORT" --bwlimit=$BWLIMIT -aHP --sparse --exclude-from=$LOCALEXCLUDELISTFILE --exclude-from=$CONFIGTEMPPATH/$1.backupexcludelist --delete --delete-excluded --backup --backup-dir $UNLIMITEDROLLBACKDIR/$NOW $1:/* $CURRENTBACKUPDIR
+	/usr/bin/rsync -aHPvv --sparse --remove-source-files --exclude-from=$CONFIGTEMPPATH/$1.incrementallist $UNLIMITEDROLLBACKDIR/$NOW/* $LIMITEDROLLBACKDIR/$NOW/
 	/bin/echo "cleaning up empty dirs"
 	/usr/bin/find $UNLIMITEDROLLBACKDIR/$NOW -type d -empty -delete
 	/usr/bin/find $LIMITEDROLLBACKDIR/$NOW -type d -empty -delete

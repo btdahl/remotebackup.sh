@@ -1,7 +1,7 @@
 remotebackup.sh - rsync rotating rollback and/or incremental backup
 
 by btd@apario.net 
-2002 - 2017 (c) apario
+2002 - 2019 (c) apario
 
 Bash script that uses rsync to create full remote server backup with
 rollbaks. Features:
